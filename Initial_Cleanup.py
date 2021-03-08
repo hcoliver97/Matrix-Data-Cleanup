@@ -8,18 +8,18 @@ Initial cleanup file for google maps scraper output
     pandas 'pip/conda install pandas'
 
 TODO
- * take in file to clean as input
  * generate new csv file of cleaned data
     - delete original one?
  * output message to terminal of results and new file name/path
 
 """
 # Pandas - data analysis module for python
+import sys
 import pandas as pd
 
-# Read contents of csv
-# TODO - convert to use file path of file from input
-data = pd.read_csv('~/Documents/Matrix/GoogleSearchResults.csv')
+# Read contents of csv file specified in commandline
+filepath = sys.argv[1]
+data = pd.read_csv(filepath)
 
 # Convert CSV file content to Data Frame for easier manipulation
 df = pd.DataFrame(data)
