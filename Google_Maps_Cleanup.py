@@ -9,7 +9,6 @@ Initial cleanup file for google maps scraper output
 
 TODO
  * Delete original data file?
- * output message to terminal of results and new file name/path
 
 """
 # Pandas - data analysis module for python
