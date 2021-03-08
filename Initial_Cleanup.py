@@ -8,8 +8,7 @@ Initial cleanup file for google maps scraper output
     pandas 'pip/conda install pandas'
 
 TODO
- * generate new csv file of cleaned data
-    - delete original one?
+ * Delete original data file?
  * output message to terminal of results and new file name/path
 
 """
@@ -42,5 +41,10 @@ df = df[df.website.notna()]
 # Drop error column since every row is error free now
 df = df.drop(['error'], axis = 1)
 
-# Print information about remaining data frame
-print(df.info())
+# Output cleaned data frame to new file in same directory as original
+temp = filepath.find('.csv')
+new_filepath = filepath[:temp] + '_Cleaned' + filepath[temp:]
+df.to_csv(new_filepath, index=False)
+
+# Outputs message to terminal indicatng successful run
+print('Cleaned file exported to: ' + new_filepath)
