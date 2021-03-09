@@ -13,7 +13,9 @@ Data Cleaning Script for Google Maps Scraper Output
 
 TODO
  * Delete original data file?
- * Error/edge case handling?
+ * Error/edge case handlling:
+    - Make it so it can handle if there isnt enough input columns
+    - Check if the necessary columns exist?
 
 """
 # Pandas - data analysis module for python
@@ -27,15 +29,22 @@ data = pd.read_csv(filepath)
 # Convert CSV data to Data Frame (Pandas object) for easier manipulation
 df = pd.DataFrame(data)
 
+# Test Drop
+df = df.drop(['rating', 'reviewCount',],axis = 1)
+
 # Delete unnecessary columns from Data Frame
 # Can be updated to fit client need
 # Keeping only columns:
 # placeUrl, title, category, address, website, phoneNumber, openingHours,
 # isClaimed, latitude, and longitude.
-df = df.drop(['subtitle', 'rating', 'reviewCount', \
+
+deletion_list = ['subtitle', 'rating', 'reviewCount', \
         'attributes', 'plusCode', 'imgUrl', 'query', 'timestamp',\
         'tuesday','wednesday','thursday','friday','saturday',\
-        'sunday','monday'], axis = 1)
+        'sunday','monday']
+
+# Deletes columns if they exist, ignores error otherwise
+df = df.drop(deletion_list, axis = 1, errors = 'ignore')
 
 # Keep only results (rows) with no errors (error is null)
 # All rows containing erorrs in scraping process are deleted
