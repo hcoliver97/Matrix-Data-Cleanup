@@ -14,6 +14,7 @@ Data Cleaning Script for Google Maps Scraper Output
 TODO
  * Error/edge case handlling:
     - check to see if its the right file?
+ * Debug mode?
 
 """
 # Pandas - data analysis module for python
@@ -26,9 +27,6 @@ data = pd.read_csv(filepath)
 
 # Convert CSV data to Data Frame (Pandas object) for easier manipulation
 df = pd.DataFrame(data)
-
-# Test Drop
-df = df.drop(['rating', 'reviewCount',],axis = 1)
 
 # List of columns to delete
 # Can be updated to fit client need
