@@ -2,7 +2,8 @@
 Data Cleaning Script for LinkedIn Profile Scraper
 
 TODO:
- * Processing the letters at end of last last name
+ * Individual Data Cleanup
+    - Last names with extra title letters 
  * documentation
  * debug mode?
 
