@@ -18,6 +18,7 @@ business_lead_df = pd.DataFrame(columns = bl_fields)
 
 # Read in iput files, make sure to check if cleaned or run cleaning module on it
 input_filepath = sys.argv[1]
+
 input_data = pd.read_csv(input_filepath)
 input_df = pd.DataFrame(input_data)
 
