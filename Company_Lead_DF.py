@@ -6,7 +6,7 @@ Sample Script to Convert Company Lead Info CSVs into one big CSV
 
  TODO:
     * pass data through cleaning protocol
-
+    * where to check for CSV and where to output it
 
 """
 import sys
@@ -14,38 +14,45 @@ import pandas as pd
 import numpy as np
 import os.path
 from os import path
-#import Data_Cleanup
 
-
+# Check if business_lead_df CRV has already been created.
+# Read CSV to populate DataFrame or create new with given columns
 if path.exists('business_lead_df.csv'):
+    # Read in CSV to Data frame
     business_lead_df = pd.read_csv('business_lead_df.csv')
-    business_lead_df - pd.DataFrame(business_lead_df)
+    business_lead_df = pd.DataFrame(business_lead_df)
 else:
-    # Create business lead data frame --> we want to keep adding to existing csv
-    # so this needs to be if csv file for existing business lead df isnt existing
+    # Create business lead data frame if CSV file with leads doesn't exist
     bl_fields = ['title','sector', 'website', 'phoneNumber', 'address',\
         'linkedInUrl', 'size', 'revanue', 'contactPerson']
 
     business_lead_df = pd.DataFrame(columns = bl_fields)
 
-# Read in iput files, make sure to check if cleaned or run cleaning module on it
+# Read in file specified in commandline
+# TODO: right now it only handles cleaned google maps search files
 input_filepath = sys.argv[1]
-
 input_data = pd.read_csv(input_filepath)
 input_df = pd.DataFrame(input_data)
+
+# Rename + add columns to match format of business lead data frame
+# TODO: Make a check for if these columns already exist
 input_df.rename(columns = {'category':'sector'}, inplace = True)
 input_df['linkedInUrl'] = np.nan
 input_df['size'] = np.nan
 input_df['revanue'] = np.nan
 input_df['contactPerson'] = np.nan
-# clean data
 
-# Add cleaned data entries to business_lead_df
+# Add input data to the business lead dataframe
+# Data shouls be added to bottom of dataframe while ignoring indexing
+# associated with input dataframe. Inner join meaning only columns in
+# both data frames will be added
 business_lead_df = pd.concat([business_lead_df,input_df], axis = 0, \
     ignore_index = True, join = 'inner')
 
-#drop duplicate entries --> check if it works proeprly
+# Drop any duplicate entries according to pandas own checking algorithm
+# --> Not sure if most efficient for our purposes but will do for now
+# and reset the indexes so the whole sheet has unique indecies from 0 to (n-1)
 business_lead_df.drop_duplicates().reset_index(drop = True)
 
-# Publish processed dataframe to CSV file
+# Write filled business lead data frame to CSV file
 business_lead_df.to_csv('business_lead_df.csv')
