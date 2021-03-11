@@ -11,6 +11,7 @@ Sample Script to Convert Company Lead Info CSVs into one big CSV
 """
 import sys
 import pandas as pd
+import numpy as np
 import os.path
 from os import path
 #import Data_Cleanup
@@ -33,12 +34,15 @@ input_filepath = sys.argv[1]
 input_data = pd.read_csv(input_filepath)
 input_df = pd.DataFrame(input_data)
 input_df.rename(columns = {'category':'sector'}, inplace = True)
+input_df['linkedInUrl'] = np.nan
+input_df['size'] = np.nan
+input_df['revanue'] = np.nan
+input_df['contactPerson'] = np.nan
 # clean data
 
 # Add cleaned data entries to business_lead_df
 business_lead_df = pd.concat([business_lead_df,input_df], axis = 0, \
     ignore_index = True, join = 'inner')
-print(business_lead_df.info())
 
 #drop duplicate entries --> check if it works proeprly
 business_lead_df.drop_duplicates().reset_index(drop = True)
