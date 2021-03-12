@@ -21,45 +21,44 @@ TODO
 import sys
 import pandas as pd
 
-# Read contents of csv file specified in commandline input
-filepath = sys.argv[1]
-data = pd.read_csv(filepath)
+if __name__ == '__main__':
+    clean()
 
-# Convert CSV data to Data Frame (Pandas object) for easier manipulation
-df = pd.DataFrame(data)
+def clean(df):
+    # Take in DataFrame of google maps export to clean
 
-# List of columns to delete
-# Can be updated to fit client need
-# Keeping only columns:
-# placeUrl, title, category, address, website, phoneNumber, openingHours,
-# isClaimed, latitude, and longitude.
+    # List of columns to delete
+    # Can be updated to fit client need
+    # Keeping only columns:
+    # placeUrl, title, category, address, website, phoneNumber, openingHours,
+    # isClaimed, latitude, and longitude.
 
-deletion_list = ['subtitle', 'rating', 'reviewCount', \
-        'attributes', 'plusCode', 'imgUrl', 'query', 'timestamp',\
-        'tuesday','wednesday','thursday','friday','saturday',\
-        'sunday','monday']
+    deletion_list = ['subtitle', 'rating', 'reviewCount', \
+            'attributes', 'plusCode', 'imgUrl', 'query', 'timestamp',\
+            'tuesday','wednesday','thursday','friday','saturday',\
+            'sunday','monday']
 
-# Deletes columns specified in list if they exist, ignores error otherwise
-df = df.drop(deletion_list, axis = 1, errors = 'ignore')
+    # Deletes columns specified in list if they exist, ignores error otherwise
+    df = df.drop(deletion_list, axis = 1, errors = 'ignore')
 
-# Keep only results (rows) with no errors (error is null)
-# All rows containing erorrs in scraping process are deleted
-df = df[df.error.isna()]
+    # Keep only results (rows) with no errors (error is null)
+    # All rows containing erorrs in scraping process are deleted
+    df = df[df.error.isna()]
 
-# Keep only results (rows) with a website (website is not null)
-# Every row will have an associated website now
-df = df[df.website.notna()]
+    # Keep only results (rows) with a website (website is not null)
+    # Every row will have an associated website now
+    df = df[df.website.notna()]
 
-# Drop error column since every row is error free now
-df = df.drop(['error'], axis = 1)
+    # Drop error column since every row is error free now
+    df = df.drop(['error'], axis = 1)
 
-# Generate new filepath to store the cleaned file
-# [original file name]_Cleaned.csv in same directory as original file path
-temp = filepath.find('.csv')
-new_filepath = filepath[:temp] + '_Cleaned' + filepath[temp:]
+    # Generate new filepath to store the cleaned file
+    # [original file name]_Cleaned.csv in same directory as original file path
+    temp = filepath.find('.csv')
+    new_filepath = filepath[:temp] + '_Cleaned' + filepath[temp:]
 
-# Output data to new filepath as CSV
-df.to_csv(new_filepath, index=False)
+    # Output data to new filepath as CSV
+    df.to_csv(new_filepath, index=False)
 
-# Outputs message and new filepath to terminal
-print('Cleaned file exported to: ' + new_filepath)
+    # Outputs message and new filepath to terminal
+    print('Cleaned file exported to: ' + new_filepath)

@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import os.path
 from os import path
+import Data_Cleanup
 
 # Check if business_lead_df CRV has already been created.
 # Read CSV to populate DataFrame or create new with given columns
@@ -30,9 +31,12 @@ else:
 
 # Read in file specified in commandline
 # TODO: right now it only handles cleaned google maps search files
+# if first column is placeUrl then its a google maps export file
 input_filepath = sys.argv[1]
 input_data = pd.read_csv(input_filepath)
 input_df = pd.DataFrame(input_data)
+# call clean data and pass input_df into it
+Data_Cleanup.data_cleanup(input_df)
 
 # Rename + add columns to match format of business lead data frame
 # TODO: Make a check for if these columns already exist
