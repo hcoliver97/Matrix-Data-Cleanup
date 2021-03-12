@@ -11,11 +11,13 @@ if __name__ == '__main__':
 
 def data_cleanup(df):
     if df.columns[0] == 'placeUrl':
-        google_maps_ceanup(df)
+        df = google_maps_ceanup(df)
     elif df.columns[0] == 'profileUrl':
-        sn_search_cleanup(df)
+        df = sn_search_cleanup(df)
     else:
         print('Unfamilier filetype or already cleaned.')
+
+    return df
 
 def google_maps_ceanup(df):
     # Take in DataFrame of google maps export to clean
@@ -35,13 +37,19 @@ def google_maps_ceanup(df):
     df = df.drop(['error'], axis = 1, errors = 'ignore')
     # Keep only results (rows) with a website (website is not null)
     df = df[df.website.notna()]
+    return df
 
 def sn_search_cleanup(df):
     # Keep only
-    #   profileUrl, firstName, lastName, companyName, title, companyId, summary,
+    #   profileUrl, firstName, lastName, companyName, title, companyUrl, summary,
     #   location duration pastRole pastCompany
-    deletion_list = ['name', 'companyUrl', 'pastCompanyUrl', \
+    deletion_list = ['name', 'companyId', 'pastCompanyUrl', \
         'connectionDegree','profileImageUrl', 'sharedConnectionsCount', 'vmid', \
         'isPremium', 'query', 'timestamp']
     # Deletes columns specified in list if they exist, ignores error otherwise
     df = df.drop(deletion_list, axis = 1, errors = 'ignore')
+    # Keep only results (rows) with no errors (error is null)
+    df = df[df.error.isna()]
+    # Drop error column since every row is error free now
+    df = df.drop(['error'], axis = 1, errors = 'ignore')
+    return df
