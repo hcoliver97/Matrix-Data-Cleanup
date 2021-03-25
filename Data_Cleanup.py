@@ -26,9 +26,11 @@ if __name__ == '__main__':
 def data_cleanup(df):
     # Check name of first column to determine file type
     if df.columns[0] == 'placeUrl':
-        df = google_maps_ceanup(df)
+        df = google_maps_cleanup(df)
     elif df.columns[0] == 'profileUrl':
         df = sn_search_cleanup(df)
+    elif def.columns[0] == 'Email address':
+        df = constant_contact_cleanup(df)
     else:
         # No change to the data frame
         print('NOTE: Unfamilier file type or already clean.')
@@ -36,7 +38,7 @@ def data_cleanup(df):
     return df
 
 # function version of previous Google_Maps_Cleanup script
-def google_maps_ceanup(df):
+def google_maps_cleanup(df):
     # Take in DataFrame of google maps export to clean
     # Keeping only columns:
     # placeUrl, title, category, address, website, phoneNumber, openingHours,
@@ -70,5 +72,22 @@ def sn_search_cleanup(df):
     df = df[df.error.isna()]
     # Drop error column since every row is error free now
     df = df.drop(['error'], axis = 1, errors = 'ignore')
-    # return updated dataframe 
+    # return updated dataframe
+    return df
+
+# function to clean up Constant Contact E-blast CSV
+def constant_contact_cleanup(df):
+    # Keep only columns:
+    # Email address, First name, Last name, Company, Job title, Email status,
+    # Phone - mobile, Phone - work, Street address line 1 - Home, City - Home,
+    # State/Province - Home, Zip/Postal Code - Home, Website, Industry,
+    # Annual Revenue, number of employees, Tags, Opened At
+    deletion_list = ['Email permission status', 'Email update source', \
+        'Confirmed Opt-Out Date','Confirmed Opt-Out Source', \
+        'Confirmed Opt-Out Reason', 'Salutation', \
+        'Email Lists', 'Source Name', 'Created At', 'Updated At']
+    # Deletes columns specified in list if they exist, ignores error otherwise
+    df = df.drop(deletion_list, axis = 1, errors = 'ignore')
+
+    # return updated dataframe
     return df
