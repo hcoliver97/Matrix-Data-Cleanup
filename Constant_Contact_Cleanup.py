@@ -1,9 +1,7 @@
 """
-Data Cleaning Script for LinkedIn Profile Scraper
+Data Cleaning Script for Eblast results CSV
 
 TODO:
- * Individual Data Cleanup
-    - Last names with extra title letters
  * documentation
  * debug mode?
 
@@ -19,11 +17,13 @@ data = pd.read_csv(filepath)
 # Convert CSV data to Data Frame (Pandas object) for easier manipulation
 df = pd.DataFrame(data)
 
+print(df.info())
+
 # Keep only columns:
 # Email address, First name, Last name, Company, Job title, Email status,
 # Phone - mobile, Phone - work, Street address line 1 - Home, City - Home,
 # State/Province - Home, Zip/Postal Code - Home, Website, Industry,
-# Annual Revenue, number of employees, Tags, Opened At
+# Annual Revenue, number of employees, Tags, Opened At, Updated At
 deletion_list = ['Email permission status', 'Email update source', \
     'Confirmed Opt-Out Date','Confirmed Opt-Out Source', \
     'Confirmed Opt-Out Reason', 'Salutation', \
@@ -42,3 +42,4 @@ df.to_csv(new_filepath, index=False)
 
 # Outputs message and new filepath to terminal
 print('Cleaned file exported to: ' + new_filepath)
+print(df.info())

@@ -29,7 +29,7 @@ def data_cleanup(df):
         df = google_maps_cleanup(df)
     elif df.columns[0] == 'profileUrl':
         df = sn_search_cleanup(df)
-    elif def.columns[0] == 'Email address':
+    elif df.columns[0] == 'Email address':
         df = constant_contact_cleanup(df)
     else:
         # No change to the data frame
