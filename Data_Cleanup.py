@@ -77,6 +77,20 @@ def sn_search_cleanup(df):
 
 # function to clean up Constant Contact E-blast CSV
 def constant_contact_cleanup(df):
+    # if last column is opened at call open_log_cleanup
+    # if the last column is clicked at call click_log_cleanup
+    if df.columns[-1] == 'Opened At':
+        df = open_log_cleanup(df)
+    elif df.columns[-1] == 'Clicked At':
+        df = click_log_cleanup(df)
+    else:
+        print('NOTE: Unfamilier CC file type.')
+
+    # return updated dataframe
+    return df
+
+# Functions clean constant contact open logs
+def open_log_cleanup(df):
     # Keep only columns:
     # Email address, First name, Last name, Company, Job title, Email status,
     # Phone - mobile, Phone - work, Street address line 1 - Home, City - Home,
@@ -89,5 +103,20 @@ def constant_contact_cleanup(df):
     # Deletes columns specified in list if they exist, ignores error otherwise
     df = df.drop(deletion_list, axis = 1, errors = 'ignore')
 
-    # return updated dataframe
+    return df
+
+# Function that cleans constant contact click logs
+def click_log_cleanup(df):
+    # Keep only columns:
+    # Email address, First name, Last name, Tags, Clicked Link Address, Opened At
+    deletion_list = ['Company','Job title','Email permission status',\
+    'Phone - home', 'Phone - work','Street address line 1 - Home',\
+    'City - Home', 'State/Province - Home', 'Country - Home', 'Website'\
+     'Industry', 'Annual Revenue', 'Initial Email Status', 'Company LI',\
+     'LinkedIn URL','number of employees','Prospect Location', \
+     'Location of Contact', 'Email Lists', 'Source Name','Created At'\
+     'Updated At',]
+    # Deletes columns specified in list if they exist, ignores error otherwise
+    df = df.drop(deletion_list, axis = 1, errors = 'ignore')
+
     return df

@@ -19,17 +19,35 @@ df = pd.DataFrame(data)
 
 print(df.info())
 
-# Keep only columns:
-# Email address, First name, Last name, Company, Job title, Email status,
-# Phone - mobile, Phone - work, Street address line 1 - Home, City - Home,
-# State/Province - Home, Zip/Postal Code - Home, Website, Industry,
-# Annual Revenue, number of employees, Tags, Opened At, Updated At
-deletion_list = ['Email permission status', 'Email update source', \
-    'Confirmed Opt-Out Date','Confirmed Opt-Out Source', \
-    'Confirmed Opt-Out Reason', 'Salutation', \
-    'Email Lists', 'Source Name', 'Created At', 'Updated At']
+if df.columns[-1] == 'Opened At':
+    # Keep only columns:
+    # Email address, First name, Last name, Company, Job title, Email status,
+    # Phone - mobile, Phone - work, Street address line 1 - Home, City - Home,
+    # State/Province - Home, Zip/Postal Code - Home, Website, Industry,
+    # Annual Revenue, number of employees, Tags, Opened At
+    deletion_list = ['Email permission status', 'Email update source', \
+        'Confirmed Opt-Out Date','Confirmed Opt-Out Source', \
+        'Confirmed Opt-Out Reason', 'Salutation', \
+        'Email Lists', 'Source Name', 'Created At', 'Updated At']
 
-# Deletes columns specified in list if they exist, ignores error otherwise
+elif df.columns[-1] == 'Clicked At':
+    print("click log file found")
+    # Keep only columns:
+    # Email address, First name, Last name, Tags, Clicked Link Address, Opened At
+    deletion_list = ['Company','Job title','Email permission status',\
+        'Email update source','Phone - home','Phone - mobile', 'Phone - work',\
+        'Street address line 1 - Home', 'City - Home', \
+        'State/Province - Home', 'Country - Home', \
+        'Zip/Postal Code - Home', 'Website',\
+        'Industry', 'Annual Revenue', 'Initial Email Status', 'Company LI',\
+        'LinkedIn URL','number of employees','Prospect Location', \
+        'Location of Contact', 'Email Lists', 'Source Name','Created At',\
+        'Updated At',]
+else:
+    print('NOTE: Unfamilier CC file type.')
+
+
+#drop columns depending on file type
 df = df.drop(deletion_list, axis = 1, errors = 'ignore')
 
 # Generate new filepath to store the cleaned file
