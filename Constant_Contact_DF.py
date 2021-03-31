@@ -1,13 +1,34 @@
 """
-Updates Constant Contact output CSV using most recent verison
+Updates Constant Contact DF CSV using most recent verison of open
+and click log CSVs from Constant Contact
+
+input:
+    Open Logs - Download from CC, contains email, open timestamp, other lead info.
+                Each row is one lead with unique email address.
+
+    Click Logs - Download from CC, contains email, clicked timestamp,
+                clicked links. Each row is one click.
+
+NOTE: This does not drop leads who have unsubsribed. Filter as needed later.
+
+1. Creates DF file if none exists in script directory
+2. Reads in CSV from directory specified in commandline,
+    calls Data_Cleanup script to clean the data.
+3. Check and store filetype (Clicks or Opens) in variable.
+3. If Open log is read in and DF file is empty, populate DF with
+    cleaned open log data.
+4. Condense click log data to one row per unique email address.
+    'Clicked At' - first click timestamp
+    'Clicked Link Address' - URLs separated by ,
 
 TODO:
-    - It will create and populate initial John_Grillos_CC_Updated.csv fine
-        but checking if email values match between updated file and input file
-        reults in errors
-    - handle new openings, status Updates
-    - handle logging clickthroughs
+    - If DF is not empty, add only new values from Open log to DF.
+    - If Clicks log is read in, condense clicked at and click link address data
+        into one entry for each unique email and insert data into row
+        corresponding to that email address.
 
+    - Handle reading in newer versions of click log
+    - Handle dealing with file and DF names
 
 """
 
@@ -18,73 +39,90 @@ import os.path
 from os import path
 import Data_Cleanup
 
-# Check if human_lead_df CSV has already been created.
-# Read CSV to populate human_lead_df or create new with given columns
-if path.exists('John_Grillos_CC_Updated.csv'):
-    # Read in CSV data
-    cc_updated = pd.read_csv('John_Grillos_CC_Updated.csv')
+# Check if CC DataFrame CSV has already been created in script directory.
+# TODO: Maybe chance cc_updated to more descriptive name
+if path.exists('John_Grillos_CC_DF.csv'):
+    # If the DF exists, read in CSV data and store as DataFrame object
+    cc_updated = pd.read_csv('John_Grillos_CC_DF.csv')
     cc_updated = pd.DataFrame(cc_updated)
 else:
-    # Create human lead data frame if CSV file with leads doesn't exist
-    # TODO: Error handling
-    cc_fields = ['Email address', 'First name', 'Last name', 'Company', \
-    'Job title', 'Email status', 'Phone - mobile', 'Phone - work', \
-    'Street address line 1 - Home', 'City - Home',
-     'State/Province - Home', 'Zip/Postal Code - Home', 'Website', \
-     'Industry', 'Annual Revenue', 'number of employees', 'Tags', 'Opened At']
+    # If DF CSV does not exist, create new DataFrame object
+    cc_fields = ['Email address', 'First name', 'Last name','Company',\
+    'Job title','Email status','Phone - home','Phone - mobile',\
+    'Phone - work','Street address line 1 - Home','City - Home',\
+    'State/Province - Home','Zip/Postal Code - Home','Country - Home',\
+    'Website','Industry','Annual Revenue','Company LI','LinkedIn URL',\
+    'number of employees','Tags','Opened At','Clicked Link Address',\
+    'Clicked At']
 
     cc_updated = pd.DataFrame(columns = cc_fields)
 
-
-
-# Read in newer CC info CSV specified in input
+# Read in CC data file specified in commandline and store as DataFrame object
 input_filepath = sys.argv[1]
 input_data = pd.read_csv(input_filepath)
 input_df = pd.DataFrame(input_data)
 
-# Clean data by calling Data_Cleanup script
+# Call Data_Cleanup script on read in data
+#   The script will determine what file time it has recieved and clean
+#   to specificatin of that file type.
 input_df = Data_Cleanup.data_cleanup(input_df)
 
-# Handling new opens
-#Check the top value of last version of cc update file.
-# If it is the same as the top value of newest CC CSV,
-# this means no new opens were made.
-new_leads = 0
+# Check the last column of the DataFrame to determine what file type has been
+# read in and store in variable for later use.
+if input_df.columns[-1] == 'Opened At':
+    # file_type 0 - CC email opens log CSV.
+    file_type = 0
+elif input_df.columns[-1] == 'Clicked At':
+    # file_type 1 - CC click log CSV.
+    file_type = 1
+else:
+    print('NOTE: Unfamilier CC file type.')
 
-for lead in input_df['Email address']:
+# Start processing the input data.
+# Email open logs:
+if file_type == 0:
+    # Check if client DF is empty
     if cc_updated.empty:
-        new_leads = len(input_df)
-        break
-
-    if str(cc_updated[lead]['Email address']) == str(input_df[lead]['Email address']):
-        #found last updated lead
-        break
+        # If empty, add input data to client dataframe as is.
+        # 'Click Link Address' and 'Clicked At' columns will remain empty
+        # in the client dataframe.
+        cc_updated = pd.concat([cc_updated, input_df])
     else:
-        # this lead hasn't been added to updated csv yet
-        new_leads = new_leads + 1
+        # *** TODO ***
+        # if dataframe not empty, add unique entries only
+        # for "opened at" > top "opened at" in DF, add row to DF
+        print("File type: Open log")
 
-# when for loop finishes we should know how many rows of new leads we have
-# to add to the updated DF. if there are any to add, concat.
-if new_leads > 0:
-    cc_updated = pd.concat([input_df.head(new_leads), cc_updated], ignore_index = True)
-    # this will add input_df new rows to top of updated cc database
-    # now both databases shoud have same rows and columns
-    print(cc_updated.info())
+# Click logs:
+elif file_type == 1:
+    # Save only first timestamp for each unique email address
+    clicked_at = input_df.groupby('Email address').agg({'Clicked At':'first'}).reset_index()
+    # Combine clicked links for each unique email adrress seperated by ', '
+    clicked_links = input_df.groupby('Email address').agg({'Clicked Link Address':', '.join}).reset_index()
 
-# Handling status change
-# for each row in updated dataframe, compare email status with corresponding
-# row on new csv data. if different, updat the dataframe to match the new data.
-"""
-for lead in cc_updated['Email address']:
-    # check if email status matches for each lead
-    if cc_updated['Email status'][lead] == input_df['Email status'][lead]:
-        #if they match, no need to update. move to next row.
-        continue
-    else:
-        # if they don't match, set new status to match input csv
-        cc_updated['Email status'][lead] == input_df['Email status'][lead]
-"""
-# at end of for loop all email statuses should be updated
+    # Drop duplicate email addresses from the click log dataframe
+    input_df = input_df.drop_duplicates(subset=['Email address'],ignore_index = True)
 
-# Write final updated CC data frame to CSV file
-cc_updated.to_csv('John_Grillos_CC_Updated.csv')
+    # Load timestamp and clicked url CSV into 'Clicked At' and
+    # 'Clicked Link Address' into the click log dataframe
+    # *** TODO ***
+    # Is adding timestamp again redundant when it alreay exists associated
+    # with the email address?
+    input_df['Clicked At'] = clicked_at['Clicked At']
+    input_df['Clicked Link Address'] = clicked_links['Clicked Link Address']
+
+    # *** TODO ***
+    # Merge input_df and cc_updated DF so that the 'Clicked At' and
+    #   'Clicked Link Address' will be updated at row corresponding to
+    #   email address.
+
+else:
+    print('NOTE: Unfamilier CC file type.')
+
+
+# Ouput the client DataFrame to CSV file for storage.
+# Ignore index because we don't want indexing column added new every tiem
+# we write to the file.
+print(cc_updated.info())
+print(input_df)
+cc_updated.to_csv('John_Grillos_CC_DF.csv', index = False)

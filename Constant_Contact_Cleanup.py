@@ -19,6 +19,11 @@ df = pd.DataFrame(data)
 
 print(df.info())
 
+# Check last column of data frame to see if it is log file of email opens
+# or a file of email clicks. For the email clicks file we will drop all info
+# that will not be used in searching dataframe to add to correct spot.
+# informaiton on leads should already be in dataframe from processing email open.
+
 if df.columns[-1] == 'Opened At':
     # Keep only columns:
     # Email address, First name, Last name, Company, Job title, Email status,
@@ -41,8 +46,9 @@ elif df.columns[-1] == 'Clicked At':
         'Zip/Postal Code - Home', 'Website',\
         'Industry', 'Annual Revenue', 'Initial Email Status', 'Company LI',\
         'LinkedIn URL','number of employees','Prospect Location', \
-        'Location of Contact', 'Email Lists', 'Source Name','Created At',\
-        'Updated At',]
+        'Location of Contact', 'Infogroup ID','Gender','Email Lists', \
+        'Source Name','Created At','Updated At',]
+
 else:
     print('NOTE: Unfamilier CC file type.')
 
