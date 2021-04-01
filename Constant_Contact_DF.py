@@ -19,16 +19,15 @@ NOTE: This does not drop leads who have unsubsribed. Filter as needed later.
     cleaned open log data.
 4. Condense click log data to one row per unique email address.
     'Clicked At' - first click timestamp
-    'Clicked Link Address' - URLs separated by ,
+    'Clicked Link Address' - URLs separated by ' ,'
+5. Insert click log data into row of associated email address
+6. Output updated DF to CSV.
 
 TODO:
     - If DF is not empty, add only new values from Open log to DF.
-    - If Clicks log is read in, condense clicked at and click link address data
-        into one entry for each unique email and insert data into row
-        corresponding to that email address.
-
     - Handle reading in newer versions of click log
     - Handle dealing with file and DF names
+        Maybe by having client name in a variable to read in and insert etc.
 
 """
 
@@ -39,11 +38,17 @@ import os.path
 from os import path
 import Data_Cleanup
 
+# Client Name - 'First_Last'
+#               Who'se CC data are we processing?
+#               Used in naming files and reading in files.
+client = 'Brandee_Justus'
+client_DF_name = client+'_CC_DF.csv'
+
 # Check if CC DataFrame CSV has already been created in script directory.
 # TODO: Maybe chance cc_updated to more descriptive name
-if path.exists('John_Grillos_CC_DF.csv'):
+if path.exists(client_DF_name):
     # If the DF exists, read in CSV data and store as DataFrame object
-    cc_updated = pd.read_csv('John_Grillos_CC_DF.csv')
+    cc_updated = pd.read_csv(client_DF_name)
     cc_updated = pd.DataFrame(cc_updated)
 else:
     # If DF CSV does not exist, create new DataFrame object
@@ -111,10 +116,20 @@ elif file_type == 1:
     input_df['Clicked At'] = clicked_at['Clicked At']
     input_df['Clicked Link Address'] = clicked_links['Clicked Link Address']
 
-    # *** TODO ***
+    #*** TODO ***
     # Merge input_df and cc_updated DF so that the 'Clicked At' and
     #   'Clicked Link Address' will be updated at row corresponding to
-    #   email address.
+    #   email address
+    # 1. lookup email address in 'Email Address' column
+    # 2. Insert 'Clicked At' data at that index df.insert(loc,column,value)
+    # 3. Insret 'Clicked Link Address' data at that indexes
+    for ind in input_df.index:
+        email = input_df['Email address'][ind]
+        df_ind = cc_updated['Email address'][cc_updated['Email address'] == email].index.tolist()
+        clicked_at_data = input_df['Clicked At'].values[ind]
+        clicked_links = input_df['Clicked Link Address'].values[ind]
+        cc_updated.loc[df_ind,'Clicked At'] = clicked_at_data
+        cc_updated.loc[df_ind,'Clicked Link Address'] = clicked_links
 
 else:
     print('NOTE: Unfamilier CC file type.')
@@ -123,6 +138,6 @@ else:
 # Ouput the client DataFrame to CSV file for storage.
 # Ignore index because we don't want indexing column added new every tiem
 # we write to the file.
-print(cc_updated.info())
-print(input_df)
-cc_updated.to_csv('John_Grillos_CC_DF.csv', index = False)
+#print(cc_updated.info())
+#print(input_df)
+cc_updated.to_csv(client_DF_name, index = False)
