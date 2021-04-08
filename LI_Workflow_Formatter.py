@@ -79,6 +79,53 @@ column_names = ['connected_at', 'profile_url','tags','email','first_name',\
 # Moves Connected At and Tags to position A and C
 df = df.reindex(columns = column_names)
 
+# Reformat the date in organization start and end columns
+# Loop through each row of DF
+for index in df.index:
+    # Loop through organizations 1 - 3
+    for i in [1, 2, 3]:
+        # convert start date from YYYY.MM to YYYY-MM so that it is in a string
+        # format that google sheets will recognize.
+        # entries with only a year will be formatted yyyy.0
+        start_date = df['organization_start_'+str(i)][index]
+        # Check if start date cell has a number in it
+        if start_date>0:
+            # split the date into start_date = [year, month]
+            start_date = str(start_date).split('.')
+            # If the month (index 0) is 0, only keep year
+            if(start_date[1]=='0'):
+                start_date = start_date[0]
+            else:
+                # If there is a month and year, join them into one string
+                # start_date = 'year-month'
+                start_date = '-'.join(start_date)
+        else:
+            # No start date, emotpty org i fields so all orgs have been checked
+            # Exit loop, continue to next row.
+            break
+
+        end_date = df['organization_end_'+str(i)][index]
+        # Check if start date cell has a number in it
+        if end_date>0:
+            # split the date into start_date = [year, month]
+            end_date = str(end_date).split('.')
+            # If the month (index 0) is 0, only keep year
+            if(end_date[1]=='0'):
+                end_date = end_date[0]
+            else:
+                # If there is a month and year, join them into one string
+                # end_date = 'year-month'
+                end_date = '-'.join(end_date)
+        else:
+            # if no end date exists, the job is a current job, add 'Present'
+            # as end date
+            end_date = 'Present'
+
+        # Save formatted date info to the DF
+        df['organization_start_'+str(i)][index] = start_date
+        df['organization_end_'+str(i)][index] = end_date
+
+
 # Generate new filepath to store the cleaned file
 # [original file name]_Cleaned.csv in same directory as original file path
 temp = filepath.find('.csv')
@@ -86,3 +133,6 @@ new_filepath = filepath[:temp] + '_Cleaned' + filepath[temp:]
 
 # Output data to new filepath as CSV
 df.to_csv(new_filepath, index=False)
+
+# Prints summary and location of output file.
+print('Cleaned file exported to: ' + new_filepath)
