@@ -41,7 +41,7 @@ import Data_Cleanup
 # Client Name - 'First_Last'
 #               Who'se CC data are we processing?
 #               Used in naming files and reading in files.
-client = 'Brandee_Justus'
+client = 'Dan_54'
 client_DF_name = client+'_CC_DF.csv'
 
 # Check if CC DataFrame CSV has already been created in script directory.
@@ -80,6 +80,10 @@ if input_df.columns[-1] == 'Opened At':
 elif input_df.columns[-1] == 'Clicked At':
     # file_type 1 - CC click log CSV.
     file_type = 1
+
+elif input_df.columns[0] == 'Reg Status':
+    # file_type 2 - C registrations sumary CSV
+    file_type = 2
 else:
     print('NOTE: Unfamilier CC file type.')
 
